@@ -89,7 +89,7 @@ function curl {
     }
 
     RecordAction $([Action]::new($behaviors, $subBehaviors, "curl.exe", $behaviorProps, $MyInvocation, ""))
-    return "Write-Host ""fake curl results"""
+    return "Write-Host ""EXECUTED DOWNLOADED PAYLOAD"""
 }
 
 function mshta ($url) {
@@ -876,4 +876,134 @@ function fakemv {
     }
 
     RecordAction $([Action]::new($behaviors, $subBehaviors, "mv", $behaviorProps, $MyInvocation, ""))
+}
+
+function VirtualAlloc {
+
+    param(
+        [Parameter(
+             Mandatory=$True,
+             ValueFromRemainingArguments=$true,
+             Position = 1
+         )][string[]]
+        $listArgs
+    )
+
+    # record the VirtualAlloc command.
+    $behaviors = @("process")
+    $subBehaviors = @()
+    $behaviorProps = @{
+	"args" = "" + $listArgs
+    }
+    
+    RecordAction $([Action]::new($behaviors, $subBehaviors, "VirtualAlloc", $behaviorProps, $MyInvocation, ""))
+}
+
+function Invoke-WebRequest ($url) {
+
+
+    $behaviors = @("network")
+    $subBehaviors = @()
+    $behaviorProps = @{
+	"uri" = $url
+    }
+
+    RecordAction $([Action]::new($behaviors, $subBehaviors, "Invoke-WebRequest", $behaviorProps, $MyInvocation, ""))
+    # Return Write-Host so we can see if this is executed by IEX.
+    return [PSCustomObject]@{
+        "content"="Write-Host ""EXECUTED DOWNLOADED PAYLOAD"""
+    }
+}
+
+##############################################
+##############################################
+# TYPE ACCELERATOR DEFINITIONS
+##############################################
+##############################################
+
+# Ex: $c = [WMICLASS]"\\$computer\root\cimv2:WIn32_Process";
+class WMICLASS {
+
+    # Optionally, add attributes to prevent invalid values
+    [ValidateNotNullOrEmpty()][string]$WMIItem
+
+    # Constructor.
+    WMICLASS($v) {
+        # Save the WMI class in case we need it for future work.
+        $this.WMIItem = $v
+    }
+
+    Create($proc, $arg2, $arg3) {
+
+        # record the full process creation command.
+        $behaviors = @("script_exec")
+        $subBehaviors = @("start_process")
+        $behaviorProps = @{
+	    "wmi_process" = $proc
+        }
+        
+        RecordAction $([Action]::new($behaviors, $subBehaviors, "WMI", $behaviorProps, $MyInvocation, ""))
+    }
+
+    [PSCustomObject] CreateInstance() {
+        return [PSCustomObject]@{
+            "ShowWindow"=0
+        }
+    }
+}
+
+function Add-MpPreference {
+
+    param(
+        [Parameter(
+             ValueFromRemainingArguments=$true,
+             Position = 1
+         )][string[]]
+        $listArgs
+    )
+
+    # record the full Defender exclusions setting command.
+    $behaviors = @("other")
+    $subBehaviors = @()
+    $behaviorProps = @{
+	"args" = "" + $listArgs
+    }
+    RecordAction $([Action]::new($behaviors, $subBehaviors, "Add-MpPreference", $behaviorProps, $MyInvocation, ""))
+}
+
+function Set-MpPreference {
+
+    param(
+        [Parameter(
+             ValueFromRemainingArguments=$true,
+             Position = 1
+         )][string[]]
+        $listArgs
+    )
+
+    # record the full Defender exclusions setting command.
+    $behaviors = @("other")
+    $subBehaviors = @()
+    $behaviorProps = @{
+	"args" = "" + $listArgs
+    }
+    RecordAction $([Action]::new($behaviors, $subBehaviors, "Set-MpPreference", $behaviorProps, $MyInvocation, ""))
+}
+
+function Copy-Item {
+
+    param(
+        [Parameter(
+             ValueFromRemainingArguments=$true,
+             Position = 1
+         )][string[]]
+        $listArgs
+    )
+
+    $behaviors = @("other")
+    $subBehaviors = @()
+    $behaviorProps = @{
+	"args" = "" + $listArgs
+    }
+    RecordAction $([Action]::new($behaviors, $subBehaviors, "Copy-Item", $behaviorProps, $MyInvocation, ""))
 }

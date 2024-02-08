@@ -38,6 +38,7 @@ class Behaviors(Enum):
     binary_import = 10
     code_create = 11
     task = 12
+    other = 13
 
 
 ####################################################################################################
@@ -102,7 +103,7 @@ class Action:
                 # don't save flexible types as members. extra work is required to work with these
                 if behavior_property not in self.flex_type_properties:
                     setattr(self, behavior_property, property_value)
-
+                    
             # just save a dict of the parameters used
             self.parameters = action_dict["Parameters"]
 
